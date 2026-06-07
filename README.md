@@ -7,10 +7,15 @@ A small client-side Pokedex that fetches Pokémon data from the public PokeAPI a
 - Displays the front sprite image
 - Minimal, dependency-free HTML/CSS/JS
 
+## Screenshot
+
+![Pikachu](pikachu.png)
+
 ## Files
 - `index.html` — main UI
 - `script.js` — fetch logic and DOM updates
 - `style.css` — simple styles
+- `pikachu.png` — sample Pokémon screenshot/image
 - `ReadMe.md` — this file
 
 ## Usage
