@@ -3,22 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pokédex — Modern Pokémon Explorer & Team Builder</title>
+    <meta name="description" content="An interactive, high-performance Pokédex featuring stats, evolution chains, cries, shiny sprites, and custom team builder.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
-    
-    <h1>
-    <span style="background-color: rgb(9, 229, 221);">Pokedex</span></h1>
 
-    <div class="search">
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-container" id="logoBtn" title="Reset Filters & Scroll to Top">
+                <div class="pokeball-lens"></div>
+                <div class="small-lights">
+                    <div class="light-dot light-red"></div>
+                    <div class="light-dot light-yellow"></div>
+                    <div class="light-dot light-green"></div>
+                </div>
+                <h1 class="app-title">POKÉDEX</h1>
+            </div>
 
-    <input type="text" id="pokemonName" placeholder="Enter the pokemon name">
-    <button id="searchButton" onclick="fetchData()">Fetch Pokemon</button>
+            <div class="header-actions">
+                <button class="btn-icon" id="soundToggleBtn" title="Toggle Sound Effects">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    <span id="soundLabel">Sound ON</span>
+                </button>
+                <button class="btn-icon" id="teamToggleBtn">
+                    <i class="fa-solid fa-star"></i>
+                    <span>My Team (<span id="teamBadgeCount">0</span>)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="search-section">
+            <div class="search-bar-wrapper">
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="pokemonName" class="search-input" placeholder="Search by Pokémon name or Dex number (e.g. 'Pikachu', '25')..." autocomplete="off">
+                    <button class="clear-search-btn" id="clearSearchBtn" title="Clear Search">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="suggestions-box" id="suggestionsBox"></div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="typeFilter" class="select-control">
+                    <option value="all">All Types</option>
+                    <option value="normal">Normal</option>
+                    <option value="fire">Fire</option>
+                    <option value="water">Water</option>
+                    <option value="grass">Grass</option>
+                    <option value="electric">Electric</option>
+                    <option value="ice">Ice</option>
+                    <option value="fighting">Fighting</option>
+                    <option value="poison">Poison</option>
+                    <option value="ground">Ground</option>
+                    <option value="flying">Flying</option>
+                    <option value="psychic">Psychic</option>
+                    <option value="bug">Bug</option>
+                    <option value="rock">Rock</option>
+                    <option value="ghost">Ghost</option>
+                    <option value="dragon">Dragon</option>
+                    <option value="dark">Dark</option>
+                    <option value="steel">Steel</option>
+                    <option value="fairy">Fairy</option>
+                </select>
+
+                <select id="genFilter" class="select-control">
+                    <option value="all">All Generations</option>
+                    <option value="gen1">Gen I (#1 - #151)</option>
+                    <option value="gen2">Gen II (#152 - #251)</option>
+                    <option value="gen3">Gen III (#252 - #386)</option>
+                    <option value="gen4">Gen IV (#387 - #493)</option>
+                    <option value="gen5">Gen V (#494 - #649)</option>
+                    <option value="gen6">Gen VI (#650 - #721)</option>
+                    <option value="gen7">Gen VII (#722 - #809)</option>
+                    <option value="gen8">Gen VIII (#810 - #905)</option>
+                    <option value="gen9">Gen IX (#906 - #1025)</option>
+                </select>
+
+                <select id="sortFilter" class="select-control">
+                    <option value="id-asc">Sort: Number (Low to High)</option>
+                    <option value="id-desc">Sort: Number (High to Low)</option>
+                    <option value="name-asc">Sort: Name (A - Z)</option>
+                    <option value="name-desc">Sort: Name (Z - A)</option>
+                </select>
+
+                <button id="randomBtn" class="btn-random">
+                    <i class="fa-solid fa-dice"></i>
+                    <span>Surprise Me!</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="pokedexView">
+            <div class="dex-grid" id="dexGrid">
+            </div>
+
+            <div class="empty-state" id="emptyStateContainer" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem; color: var(--primary-red); margin-bottom: 14px;"></i>
+                <h3 id="emptyStateTitle">No Pokémon Found</h3>
+                <p id="emptyStateDesc" style="color: var(--text-muted);">Try adjusting your search query or filter selection.</p>
+            </div>
+
+            <div class="load-more-container" id="loadMoreBtnContainer">
+                <button class="btn-load-more" id="loadMoreBtn">Load More Pokémon</button>
+            </div>
+        </section>
+
+        <section class="team-section" id="teamSection">
+            <div class="team-header-box">
+                <div>
+                    <h2><i class="fa-solid fa-star" style="color: #ffcc00; margin-right: 8px;"></i> My Saved Team</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Assemble up to 6 Pokémon to form your ideal lineup.</p>
+                </div>
+                <div class="team-count" id="teamCountText">0 / 6 Selected</div>
+            </div>
+
+            <div class="dex-grid" id="teamGrid">
+            </div>
+
+            <div class="empty-state" id="emptyTeamState" style="display: none;">
+                <i class="fa-regular fa-star" style="font-size: 3rem; color: var(--text-dim); margin-bottom: 14px;"></i>
+                <h3>Your Team is Empty</h3>
+                <p style="color: var(--text-muted);">Click the star icon on any Pokémon card or detail view to add it to your team!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="modal-backdrop" id="pokemonModal">
+        <div class="modal-container">
+            <button class="modal-close-btn" id="modalCloseBtn" title="Close (Esc)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2 class="modal-title" id="modalPokemonName">Loading...</h2>
+                    <span class="modal-id" id="modalPokemonId">#000</span>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cry" id="modalCryBtn">
+                        <i class="fa-solid fa-volume-high"></i>
+                        <span>Cry</span>
+                    </button>
+                    <button class="btn-shiny" id="modalShinyBtn">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Shiny</span>
+                    </button>
+                    <button class="btn-icon" id="modalTeamBtn" style="border-radius: 20px;">
+                        <i class="fa-regular fa-star" id="modalTeamIcon"></i>
+                        <span id="modalTeamLabel">Add to Team</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-media-col">
+                    <div class="modal-artwork-box">
+                        <img src="" alt="Pokemon Artwork" class="modal-artwork" id="modalArtwork">
+                    </div>
+                    <div class="card-types" id="modalTypes" style="margin-top: 16px;"></div>
+                    <div class="flavor-text-box" id="modalFlavorText">
+                        Fetching Pokédex entry information...
+                    </div>
+                </div>
+
+                <div class="modal-info-col">
+                    <div class="modal-tabs">
+                        <button class="tab-btn active" data-tab="tab-overview">Overview</button>
+                        <button class="tab-btn" data-tab="tab-stats">Base Stats</button>
+                        <button class="tab-btn" data-tab="tab-evolutions">Evolutions</button>
+                        <button class="tab-btn" data-tab="tab-matchups">Weaknesses</button>
+                    </div>
+
+                    <div class="tab-pane active" id="tab-overview">
+                        <div class="physical-grid">
+                            <div class="physical-card">
+                                <div class="physical-title">Height</div>
+                                <div class="physical-value" id="modalHeight">0.0 m</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="physical-title">Weight</div>
+                                <div class="physical-value" id="modalWeight">0.0 kg</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="physical-title">Category</div>
+                                <div class="physical-value" id="modalCategory">Seed Pokémon</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="physical-title">Base XP</div>
+                                <div class="physical-value" id="modalBaseExp">0</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <div class="physical-title" style="margin-bottom: 8px;">Abilities</div>
+                            <div id="modalAbilities" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tab-stats">
+                        <div id="modalStatsContainer">
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tab-evolutions">
+                        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-bottom: 10px;">
+                            Click any Pokémon in the evolutionary chain to view its details.
+                        </p>
+                        <div class="evolution-tree" id="modalEvoTree">
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tab-matchups">
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">
+                            Damage multipliers received when attacked by opposing types:
+                        </p>
+                        <div class="matchup-grid" id="modalMatchups">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
-    
-        <img src="" alt="pokemon is peak" id="pokex" style="display:none;">
-    
+
+    <footer class="app-footer">
+        <p>Powered by <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a> & Client-Side Vanilla JS</p>
+    </footer>
+
 </body>
 </html>
